@@ -1,0 +1,2 @@
+v0.1.0 -- Initial "release" by Daniel Ross.
+v0.2.0 -- Made setuptools/distutils compliant, published to PyPI, cleaned up internals.
