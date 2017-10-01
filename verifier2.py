@@ -1,9 +1,10 @@
-import yaml, json
-import random
-import traceback
-import sys
 import os
-from .condition import condition_parser
+import traceback
+
+import sys
+import yaml
+
+from pijemont.condition import condition_parser
 
 DICT = {'dict','dictionary','map'}
 LIST = {'list'}

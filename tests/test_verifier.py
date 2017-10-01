@@ -1,50 +1,70 @@
-from verifier3 import check_format, FormatHelper, verify, VerifyHelper, PijemontKeyError, PijemontTypeError, PijemontArgError
-from utils import compare_dict_keys
-import pytest
+from pijemont.exceptions import PijemontKeyError, PijemontTypeError, PijemontArgError, PijemontCastError
+from pijemont.formatter import check_format
+from pijemont.verifier import verify
 
 
-# TODO test_formatter section
-def test_missing_type():
-    errors = check_format({"values": []})
-    assert len(errors) == 1
-    assert str(PijemontKeyError("input_dict", "type")) in errors
-
-
-def test_missing_values():
-    errors = check_format({"type": "dict"})
-    assert len(errors) == 1
-    assert str(PijemontKeyError("input_dict", "values")) in errors
-
-
-def test_invalid_values_dict():
-    errors = check_format({"type": "dict", "values": None})
-    assert len(errors) == 1
-    assert str(PijemontTypeError("values", None, dict)) in errors
-
-
-# TODO test_verifier section
 def test_invalid_input_dict():
-    errors = verify(None, {"foo": {"type": "string"}})
+    ref = {"foo": {"type": "string"}}
+    check_format(ref, False)
+    errors = verify(None, ref, False)
     assert len(errors) == 1
-    assert str(PijemontTypeError("input_dict", None, dict)) in errors
+    assert str(PijemontTypeError("input", None, dict)) in errors
 
 
 def test_extra_args():
-    errors = verify({"foo": "bar", "baz": "buzz"}, {"foo": {"type": "string"}})
+    ref = {"foo": {"type": "string"}}
+    check_format(ref, False)
+    errors = verify({"foo": "bar", "baz": "buzz"}, ref, False)
     assert len(errors) == 1
-    assert str(PijemontArgError("input_dict", "baz", "foo")) in errors
+    assert str(PijemontArgError("input", "baz", "foo")) in errors
 
 
-# TODO test_utils section
-def test_compare_dict_keys():
-    k1, k2 = compare_dict_keys({}, {"hello": "world"})
-    assert len(k1) == 0
-    assert k2 == ["hello"]
-    k1, k2 = compare_dict_keys({"hello": "world"}, {"hello": "world"})
-    assert len(k1) == len(k2) == 0
-    k1, k2 = compare_dict_keys({"foo": "bar"}, {"hello": "world"})
-    assert k1 == ["foo"]
-    assert k2 == ["hello"]
+def test_optional():
+    # no default set, missing arg
+    ref = {"foo": {"type": "int"}}
+    check_format(ref, False)
+    errors = verify({}, ref, False)
+    assert len(errors) == 1
+    assert str(PijemontKeyError("input", "foo")) in errors
+    # no defaults, optional
+    ref = {"foo": {"type": "int", "optional": True}}
+    check_format(ref, False)
+    result = verify({}, ref)
+    assert result == {}
 
 
+def test_defaults():
+    # default int
+    ref = {"foo": {"type": "int", "default": 1}}
+    check_format(ref, False)
+    result = verify({}, ref)
+    assert result == {"foo": 1}
+    assert isinstance(result["foo"], int)
+    # default float
+    ref = {"foo": {"type": "float", "default": 1.5}}
+    check_format(ref, False)
+    result = verify({}, ref)
+    assert result == {"foo": 1.5}
+    assert isinstance(result["foo"], float)
+    # default string
+    ref = {"foo": {"type": "string", "default": "bar"}}
+    check_format(ref, False)
+    result = verify({}, ref)
+    assert result == {"foo": "bar"}
+    assert isinstance(result["foo"], str)
+
+
+def test_list():
+    ref = {"foo": {"type": "list", "values": {"type": "int"}}}
+    check_format(ref)
+    result = verify({"foo": []}, ref)
+    assert result == {"foo": []}
+    result = verify({"foo": [4, 5, 6]}, ref)
+    assert result == {"foo": [4, 5, 6]}
+    errors = verify({"foo": [4, 5, "a"]}, ref, False)
+    assert len(errors) == 1
+    try:
+        int("a")
+    except Exception as e:
+        assert str(PijemontCastError("foo.2", "int", e)) in errors
 

@@ -1,0 +1,14 @@
+VALID_KEYS = {"type", "description", "values", "optional", "default"}
+DICT = {"dict", "dictionary", "map"}
+LIST = {"list"}
+TUPLE = {"tuple"}
+ONEOF = {"oneof"}
+NUM = {"num", "number", "float"}
+INT = {"int", "integer"}
+STRING = {"str", "string", "multiline"}
+ANY = {"any", "stuff"}
+FILE = {"file"}
+BOOL = {"boolean", "bool"}
+ALL_TYPES = DICT | LIST | TUPLE | ONEOF | NUM | INT | STRING | ANY | FILE | BOOL
+VALUES_TYPES = DICT | LIST | TUPLE | ONEOF
+CAST_TYPES = NUM | INT | STRING

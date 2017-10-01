@@ -1,6 +1,11 @@
+import json
+import sys
+import verifier
+
 from flask import Flask, request, render_template
-import json, sys, verifier
-import doc as doc_gen
+
+from pijemont import doc as doc_gen
+
 app = Flask(__name__, static_url_path='/static')
 
 @app.route('/doc/<string:form>')
